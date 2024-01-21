@@ -1,0 +1,31 @@
+library(leaflet)
+library(RSQLite)
+
+# Establish connection
+connection <- dbConnect(RSQLite::SQLite(), dbname = "stats.db")
+
+# Get coordinate data
+query <- "SELECT points, team_name FROM standard_for"
+data <- dbGetQuery(connection, query)
+
+# Get the rest of the data
+query <- "SELECT * FROM team_info"
+rest_of_data <- dbGetQuery(connection, query)
+
+# Merge the datasets
+teams <- merge(data, rest_of_data, by = "team_name")
+
+# Create a leaflet map
+m <- leaflet(teams) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    lng = ~longitude,
+    lat = ~latitude,
+    radius = ~points * 0.5,  # Adjust the radius based on points
+    color = ~colour_code,  # Use the colour_code for marker color
+    fillOpacity = 0.7,
+    popup = ~paste(team_name, "<br>Points: ", points)
+  )
+
+# Display the map
+m
