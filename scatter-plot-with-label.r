@@ -28,8 +28,20 @@ merged_data <- merge(merged_data, colour_code_and_team, by = "team_name", all.x 
 # Determine the common limits for both x and y axes
 common_limits <- range(c(merged_data$xg, merged_data$goals))
 
+# Specify the path to the folder
+folder_path <- "path/to/desired/folder"
+
+# Clear the contents of the folder before saving the scatter plot
+unlink(folder_path, recursive = TRUE, force = TRUE)
+cat(paste("Contents of folder '", folder_path, "' deleted successfully.\n"))
+
+# Create a new empty folder
+dir.create(folder_path)
+cat(paste("New empty folder '", folder_path, "' created successfully.\n"))
+
+
 # Create a scatter plot using ggplot2
-ggplot(merged_data, aes(x = xg, y = goals, label = abbreviation, color = colour_code)) +
+scatter_plot <- ggplot(merged_data, aes(x = xg, y = goals, label = abbreviation, color = colour_code)) +
   geom_point(size = 5) +
   geom_text(vjust = 1.5, hjust = 0.5) +
   geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray") +  # Add y = x line
@@ -44,3 +56,8 @@ ggplot(merged_data, aes(x = xg, y = goals, label = abbreviation, color = colour_
     x = "Expected Goals (xG)",
     y = "Actual Goals"
   )
+
+# Save the scatter plot to the specified location with a corrected file name
+ggsave(paste0(folder_path, "/scatter_plot.png"), plot = scatter_plot, width = 8, height = 6, dpi = 300)
+cat(paste("Scatter plot saved successfully to '", paste0(folder_path, "/scatter_plot.png"), "'.\n"))
+
