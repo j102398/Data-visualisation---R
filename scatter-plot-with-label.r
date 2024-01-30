@@ -5,7 +5,7 @@ library(RSQLite)
 # Connect to the SQLITE database
 connection <- dbConnect(RSQLite::SQLite(), dbname = "stats.db")
 
-draw_graph <- function(table, x_stat, y_stat) {
+draw_graph <- function(table, x_stat, y_stat,draw_y_equals_x_line) {
   # Define a SQL query to retrieve all columns from the specified table
   query <- paste0("SELECT * FROM ", table)
   
@@ -42,6 +42,8 @@ draw_graph <- function(table, x_stat, y_stat) {
   
   
   # Create a scatter plot using ggplot2
+  #Check if a y = x line needs to be drawn
+  if (draw_y_equals_x_line == TRUE) {
   scatter_plot <- ggplot(merged_data, aes(x = .data[[x_stat]], y = .data[[y_stat]], label = abbreviation, color = colour_code)) +
     geom_point(size = 5) +
     geom_text(vjust = 1.5, hjust = 0.5) +
@@ -57,11 +59,27 @@ draw_graph <- function(table, x_stat, y_stat) {
       x = paste( x_stat),
       y = paste( y_stat)
     )
-  
+  }
+  else {
+    scatter_plot <- ggplot(merged_data, aes(x = .data[[x_stat]], y = .data[[y_stat]], label = abbreviation, color = colour_code)) +
+      geom_point(size = 5) +
+      geom_text(vjust = 1.5, hjust = 0.5) +
+      scale_color_identity() +  # Specify direct color values
+      
+      # Set the same limits for both x and y axes
+      lims(x = common_limits, y = common_limits) +
+      
+      # Add title and axis labels
+      labs(
+        title = paste(x_stat, "vs", y_stat),
+        x = paste( x_stat),
+        y = paste( y_stat)
+      )
+  }
   # Save the scatter plot to the specified location with a corrected file name
   ggsave(paste0(folder_path, "/scatter_plot.png"), plot = scatter_plot, width = 8, height = 6, dpi = 300)
   cat(paste("Scatter plot saved successfully to '", paste0(folder_path, "/scatter_plot.png"), "'.\n"))
 }
 
 # Call the function with the specified table and statistics
-draw_graph("shooting_for","shots","goals"
+draw_graph("shooting_for","xg","goals",TRUE)
